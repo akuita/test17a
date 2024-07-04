@@ -1,29 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { AttendanceRecord } from 'src/entities/attendance_records';
+import { BaseRepository } from 'src/shared/base.repository';
 
 @Injectable()
 export class AttendanceService {
   constructor(
     @InjectRepository(AttendanceRecord)
-    private attendanceRecordRepository: Repository<AttendanceRecord>,
+    private attendanceRepository: BaseRepository<AttendanceRecord>,
   ) {}
 
-  async activateCheckoutButton(employeeId: number, date: string): Promise<{ activate: boolean }> {
+  async checkAttendanceStatus(employeeId: number, date: string): Promise<{ disableCheckIn: boolean }> {
     try {
-      const attendanceRecord = await this.attendanceRecordRepository.findOne({
-        where: {
-          employee_id: employeeId,
-          date: date,
-          check_out_time: null,
-        },
+      const record = await this.attendanceRepository.getOne({
+        conditions: [
+          { column: 'employee_id', value: employeeId, operator: 'EQUAL', whereType: 'WHERE_AND' },
+          { column: 'date', value: date, operator: 'EQUAL', whereType: 'WHERE_AND' },
+        ],
       });
 
-      return { activate: !!attendanceRecord };
+      return { disableCheckIn: !!record };
     } catch (error) {
-      // Log the error or handle it as per the project's error handling policy
-      return { activate: false };
+      return { disableCheckIn: false };
     }
   }
 }
