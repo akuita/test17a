@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString, IsDateString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsDateString, IsISO8601 } from 'class-validator';
 
 export class RecordCheckInDto {
   @IsNotEmpty()
@@ -6,7 +6,7 @@ export class RecordCheckInDto {
   employeeId: number;
 
   @IsNotEmpty()
-  @IsString()
+  @IsISO8601()
   checkInTime: string;
 
   @IsNotEmpty()
