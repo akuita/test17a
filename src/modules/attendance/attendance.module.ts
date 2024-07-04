@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AttendanceController } from './attendance.controller';
 import { AttendanceService } from './attendance.service';
 import { AttendanceRecord } from '../../entities/attendance_records';
-+import { Employee } from '../../entities/employees';
+import { Employee } from '../../entities/employees';
 
 @Module({
   imports: [TypeOrmModule.forFeature([AttendanceRecord, Employee])],
