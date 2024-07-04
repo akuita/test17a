@@ -1,9 +1,11 @@
-import { IsNumber, IsDate } from 'class-validator';
+import { IsNumber, IsDate, ValidateIf, isInt, isDate } from 'class-validator';
 
 export class RecordCheckInDto {
-  @IsNumber({}, { message: 'employeeId must be a number' })
+  @IsNumber({}, { message: 'Invalid employee ID format.' })
+  @ValidateIf((o) => isInt(o.employeeId))
   employeeId: number;
 
-  @IsDate({ message: 'checkInTime must be a date' })
+  @IsDate({ message: 'Invalid check-in time format.' })
+  @ValidateIf((o) => isDate(o.checkInTime))
   checkInTime: Date;
 }
