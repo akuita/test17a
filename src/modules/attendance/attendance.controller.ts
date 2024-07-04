@@ -1,23 +1,58 @@
-import { Body, Controller, Put, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../../guards/auth.guard';
+import { Auth } from '../../decorators/auth.decorator';
 import { AttendanceService } from './attendance.service';
-import { UpdateCheckInButtonStateDto } from './dto/update-check-in-button-state.dto';
+import { RecordEmployeeCheckInDto } from './dto/record-employee-check-in.dto';
+import { getCurrentServerDateTime } from '../../shared/utils/date-time.util';
 
-@ApiTags('Attendance')
 @Controller('attendance')
 export class AttendanceController {
   constructor(private readonly attendanceService: AttendanceService) {}
 
-  @Put('/check-in-button-state')
+  @Post('check-in')
   @UseGuards(AuthGuard)
-  async updateCheckInButtonState(@Body() updateCheckInButtonStateDto: UpdateCheckInButtonStateDto) {
-    const { employee_id } = updateCheckInButtonStateDto;
-    const result = await this.attendanceService.updateCheckInButtonState(employee_id);
-    return {
-      status: 200,
-      check_in_button_state: result.isCheckInDisabled ? 'disabled' : 'active',
-      check_out_button_state: result.isCheckInDisabled ? 'active' : 'disabled',
-    };
+  @Auth()
+  @HttpCode(HttpStatus.OK)
+  async recordCheckIn(@Body() recordEmployeeCheckInDto: RecordEmployeeCheckInDto) {
+    try {
+      const { employeeId } = recordEmployeeCheckInDto;
+      const checkInResult = await this.attendanceService.recordCheckIn(employeeId);
+
+      if (checkInResult.error) {
+        return {
+          status: checkInResult.status,
+          message: checkInResult.message,
+        };
+      }
+
+      return {
+        status: HttpStatus.OK,
+        message: "Check-in recorded successfully.",
+        check_in_details: checkInResult.checkInDetails,
+      };
+    } catch (error) {
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'An unexpected error has occurred on the server.',
+      };
+    }
+  }
+
+  @Get('current-time')
+  @Auth()
+  @HttpCode(HttpStatus.OK)
+  async getCurrentTime() {
+    try {
+      const currentServerDateTime = getCurrentServerDateTime();
+      return {
+        status: HttpStatus.OK,
+        current_time: currentServerDateTime,
+      };
+    } catch (error) {
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'An unexpected error has occurred on the server.',
+      };
+    }
   }
 }
