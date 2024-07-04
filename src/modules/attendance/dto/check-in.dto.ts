@@ -1,9 +1,12 @@
-import { NumberField, DateField } from 'src/decorators/field.decorator';
+import { IsDate } from 'class-validator';
 
 export class CheckInDto {
-  @NumberField({ required: true })
-  employee_id: number;
+  @IsDate()
+  current_time: Date;
 
-  @DateField({ required: true })
-  current_date: Date;
+  @IsDate()
+  allowed_time_window_start: Date;
+
+  @IsDate()
+  allowed_time_window_end: Date;
 }

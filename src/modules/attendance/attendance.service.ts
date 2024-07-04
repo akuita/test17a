@@ -1,29 +1,19 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThanOrEqual, LessThan } from 'typeorm';
+import { BadRequestException } from '@nestjs/common';
 import { AttendanceRecord } from 'src/entities/attendance_records';
 
-@Injectable()
 export class AttendanceService {
-  constructor(
-    @InjectRepository(AttendanceRecord)
-    private attendanceRepository: Repository<AttendanceRecord>,
-  ) {}
+  // ... other methods ...
 
-  async checkDuplicateCheckIn(employeeId: number, currentDate: Date): Promise<boolean> {
-    const startOfDay = new Date(currentDate);
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(currentDate);
-    endOfDay.setHours(23, 59, 59, 999);
-
-    const existingRecord = await this.attendanceRepository.findOne({
-      where: {
-        employee_id: employeeId,
-        check_in_time: MoreThanOrEqual(startOfDay),
-        check_out_time: LessThan(endOfDay),
-      },
-    });
-
-    return !!existingRecord;
+  async checkInTimeWindow(
+    current_time: Date,
+    allowed_time_window_start: Date,
+    allowed_time_window_end: Date
+  ): Promise<boolean> {
+    if (current_time < allowed_time_window_start || current_time > allowed_time_window_end) {
+      throw new BadRequestException('Check-in attempt is outside the allowed time window.');
+    }
+    return true;
   }
+
+  // ... other methods ...
 }
