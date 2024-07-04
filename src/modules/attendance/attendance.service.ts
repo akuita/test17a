@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AttendanceRecord } from 'src/entities/attendance_records';
 import { Employee } from 'src/entities/employees';
-import { BaseRepository } from 'src/shared/base.repository';
 import { Repository } from 'typeorm';
 import * as dayjs from 'dayjs';
 
@@ -14,6 +13,10 @@ export class AttendanceService {
     @InjectRepository(Employee)
     private employeeRepository: Repository<Employee>,
   ) {}
+
+  async getEmployeeById(employeeId: number): Promise<Employee | undefined> {
+    return this.employeeRepository.findOne({ where: { id: employeeId } });
+  }
 
   async recordEmployeeCheckIn(employeeId: number, checkInTime: Date): Promise<{ status: string }> {
     // Assuming the allowed check-in time window is from 8 AM to 10 AM
